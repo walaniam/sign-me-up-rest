@@ -2,6 +2,11 @@ package pl.walaniam.signmeup;
 
 import io.javalin.Javalin;
 import lombok.extern.slf4j.Slf4j;
+import org.web3j.protocol.http.HttpService;
+import pl.walaniam.signmeup.config.RouteConfigurer;
+import pl.walaniam.signmeup.config.Web3jConfig;
+import pl.walaniam.signmeup.contracts.SignMeUpContractFactory;
+import pl.walaniam.signmeup.generated.contracts.SignMeUp;
 
 import java.util.Optional;
 
@@ -9,8 +14,28 @@ import java.util.Optional;
 public class Main {
 
 	public static void main(String[] args) {
+
+		String callerAddress = getRequiredEnv("CALLER_ADDRESS");
+		SignMeUp signMeUpContract = contractFactory().newReadOnlyContract(callerAddress);
+
+		RouteConfigurer routeConfigurer = new RouteConfigurer(signMeUpContract);
+
 		Javalin app = Javalin.create().start(getHerokuAssignedPort());
-		app.get("/", ctx -> ctx.result("Hello World"));
+		routeConfigurer.configure(app);
+	}
+
+	private static SignMeUpContractFactory contractFactory() {
+		String infuraUrl = Optional.ofNullable(System.getenv("INFURA_URL")).orElse(HttpService.DEFAULT_URL);
+		String contractAddress = getRequiredEnv("CONTRACT_ADDRESS");
+		return new SignMeUpContractFactory(
+				new Web3jConfig(infuraUrl),
+				contractAddress
+		);
+	}
+
+	private static String getRequiredEnv(String name) {
+		return Optional.ofNullable(System.getenv(name))
+				.orElseThrow(() -> new RuntimeException(name + " not set"));
 	}
 
 	private static int getHerokuAssignedPort() {
