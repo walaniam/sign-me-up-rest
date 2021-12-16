@@ -30,6 +30,16 @@
 			<version>1.18.22</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.web3j</groupId>
+			<artifactId>core</artifactId>
+			<version>4.8.9</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>30.1.1-jre</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -68,6 +78,51 @@
 						<web>java $JAVA_OPTS -cp target/classes:target/dependency/* pl.walaniam.signmeup.Main</web>
 					</processTypes>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.web3j</groupId>
+				<artifactId>web3j-maven-plugin</artifactId>
+				<version>4.8.7</version>
+				<configuration>
+					<packageName>pl.walaniam.signmeup.generated.contracts</packageName>
+					<nativeJavaType>true</nativeJavaType>
+					<outputFormat>java</outputFormat>
+					<abiSourceFiles>
+						<directory>${basedir}/src/main/resources/contracts</directory>
+						<includes>
+							<include>**/*.abi</include>
+						</includes>
+					</abiSourceFiles>
+					<outputDirectory>
+						<java>${project.build.directory}/generated-sources/contracts</java>
+					</outputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-sources</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/contracts</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
