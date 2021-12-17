@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.web3j.protocol.http.HttpService;
 import pl.walaniam.signmeup.config.RouteConfigurer;
 import pl.walaniam.signmeup.config.Web3jConfig;
+import pl.walaniam.signmeup.contracts.SignMeUpContractClient;
 import pl.walaniam.signmeup.contracts.SignMeUpContractFactory;
 import pl.walaniam.signmeup.generated.contracts.SignMeUp;
 
@@ -17,8 +18,9 @@ public class Main {
 
 		String callerAddress = getRequiredEnv("CALLER_ADDRESS");
 		SignMeUp signMeUpContract = contractFactory().newReadOnlyContract(callerAddress);
+		SignMeUpContractClient contractClient = new SignMeUpContractClient(signMeUpContract);
 
-		RouteConfigurer routeConfigurer = new RouteConfigurer(signMeUpContract);
+		RouteConfigurer routeConfigurer = new RouteConfigurer(contractClient);
 
 		Javalin app = Javalin.create().start(getHerokuAssignedPort());
 		routeConfigurer.configure(app);
